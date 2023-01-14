@@ -9,6 +9,7 @@ import {
   Home,
   Login,
   Manage,
+  Movie,
   Movies,
   NotFound,
 } from "./components";
@@ -21,8 +22,9 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       { path: "/movies", element: <Movies /> },
+      { path: "/movies/:id", element: <Movie /> },
       { path: "/genres", element: <Genres /> },
-      { path: "/admin/movie/0", element: <EditMovie /> },
+      { path: "/admin/movie/:id", element: <EditMovie /> },
       { path: "/manage", element: <Manage /> },
       { path: "/graphql", element: <Graphql /> },
       { path: "/login", element: <Login /> },
