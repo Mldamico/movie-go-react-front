@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-const moviesList = [
+export const moviesList = [
   {
     id: 1,
     title: "Highlander",
