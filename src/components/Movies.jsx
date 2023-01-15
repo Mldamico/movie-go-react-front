@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 export const moviesList = [
   {
@@ -21,7 +21,26 @@ export const moviesList = [
   },
 ];
 export const Movies = () => {
-  const [movies, setMovies] = useState(moviesList);
+  const [movies, setMovies] = useState([]);
+
+  useEffect(() => {
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+    const requestOptions = {
+      method: "GET",
+      headers,
+    };
+    fetch(`http://localhost:8080/movies`, requestOptions)
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        setMovies(data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
 
   return (
     <div className="text-center">
