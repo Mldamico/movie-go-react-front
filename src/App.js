@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useEffect, useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { Alert } from "./components/Alert";
@@ -7,7 +8,39 @@ function App() {
   const [alertMessage, setAlertMessage] = useState("");
   const [alertClassName, setAlertClassName] = useState("d-none");
 
+  const [tickInterval, setTickInterval] = useState();
+
   const navigate = useNavigate();
+
+  const toggleRefresh = useCallback(
+    (status) => {
+      if (status) {
+        let i = setInterval(() => {
+          const requestOptions = {
+            method: "GET",
+            credentials: "include",
+          };
+          fetch(`/refresh`, requestOptions)
+            .then((res) => {
+              return res.json();
+            })
+            .then((data) => {
+              if (data.access_token) {
+                setJwtToken(data.access_token);
+              }
+            })
+            .catch((err) => {
+              console.log("User is not logged in, ");
+            });
+        }, 600000);
+        setTickInterval(i);
+      } else {
+        clearInterval(tickInterval);
+        setTickInterval(null);
+      }
+    },
+    [tickInterval]
+  );
 
   useEffect(() => {
     if (jwtToken === "") {
@@ -23,13 +56,14 @@ function App() {
         .then((data) => {
           if (data.access_token) {
             setJwtToken(data.access_token);
+            toggleRefresh(true);
           }
         })
         .catch((err) => {
           console.log("User is not logged in, ", err);
         });
     }
-  }, [jwtToken]);
+  }, [jwtToken, toggleRefresh]);
 
   const logoutUser = async () => {
     const requestOptions = {
@@ -40,6 +74,7 @@ function App() {
     try {
       await fetch("/logout", requestOptions);
       setJwtToken("");
+      toggleRefresh(false);
       navigate("/login");
     } catch (err) {
       console.log("Error logging out ", err);
@@ -116,6 +151,7 @@ function App() {
               setJwtToken,
               setAlertClassName,
               setAlertMessage,
+              toggleRefresh,
             }}
           />
         </div>
