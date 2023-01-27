@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { Alert } from "./components/Alert";
 
@@ -9,9 +9,41 @@ function App() {
 
   const navigate = useNavigate();
 
-  const logoutUser = () => {
-    setJwtToken("");
-    navigate("/login");
+  useEffect(() => {
+    if (jwtToken === "") {
+      const requestOptions = {
+        method: "GET",
+        credentials: "include",
+      };
+
+      fetch(`/refresh`, requestOptions)
+        .then((res) => {
+          return res.json();
+        })
+        .then((data) => {
+          if (data.access_token) {
+            setJwtToken(data.access_token);
+          }
+        })
+        .catch((err) => {
+          console.log("User is not logged in, ", err);
+        });
+    }
+  }, [jwtToken]);
+
+  const logoutUser = async () => {
+    const requestOptions = {
+      method: "GET",
+      credentials: "include",
+    };
+
+    try {
+      await fetch("/logout", requestOptions);
+      setJwtToken("");
+      navigate("/login");
+    } catch (err) {
+      console.log("Error logging out ", err);
+    }
   };
   return (
     <div className="container">

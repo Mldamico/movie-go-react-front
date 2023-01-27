@@ -12,19 +12,37 @@ export const Login = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (email === "admin@example.com" && password === "123456") {
-      setJwtToken("ABC");
-      setAlertClassName("d-none");
-      setAlertMessage("");
-      navigate("/");
-    } else {
-      setAlertClassName("alert-danger");
-      setAlertMessage("Invalid Credentials");
-      setTimeout(() => {
-        setAlertClassName("d-none");
-        setAlertMessage("");
-      }, 2000);
-    }
+    let payload = {
+      email,
+      password,
+    };
+    const requestOptions = {
+      method: "POST",
+      headers: {
+        "Content-Type": "applic ation/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(payload),
+    };
+
+    fetch(`/authenticate`, requestOptions)
+      .then((resp) => resp.json())
+      .then((data) => {
+        if (data.error) {
+          setAlertClassName("alert-danger");
+          setAlertMessage(data.message);
+        } else {
+          setJwtToken(data.access_token);
+          setAlertClassName("");
+          setAlertMessage("");
+          navigate("/");
+        }
+      })
+      .catch((err) => {
+        console.log("Error");
+        setAlertClassName("alert-danger");
+        setAlertMessage(err);
+      });
   };
 
   return (
