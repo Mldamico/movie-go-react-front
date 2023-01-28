@@ -12,6 +12,9 @@ export const Checkbox = (props) => {
         onChange={props.onChange}
         checked={props.checked}
       />
+      <label htmlFor={props.name} className="form-check-label">
+        {props.title}
+      </label>
     </div>
   );
 };
