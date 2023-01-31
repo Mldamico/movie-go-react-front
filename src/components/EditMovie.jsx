@@ -110,6 +110,8 @@ export const EditMovie = () => {
           errorDiv={hasError("description") ? "text-danger" : "d-none"}
           errorMsg="Please enter a description"
         />
+        <hr />
+        <h3>Genres</h3>
       </form>
     </div>
   );
