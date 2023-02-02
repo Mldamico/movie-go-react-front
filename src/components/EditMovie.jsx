@@ -4,7 +4,7 @@ import { useNavigate, useOutletContext, useParams } from "react-router-dom";
 import { Input } from "./form/Input";
 import { Select } from "./form/Select";
 import { TextArea } from "./form/TextArea";
-
+import { Checkbox } from ".//form/Checkbox";
 export const EditMovie = () => {
   const [error, setError] = useState(null);
   const [errors, setErrors] = useState([]);
@@ -23,9 +23,11 @@ export const EditMovie = () => {
     runtime: "",
     mpaa_rating: "",
     description: "",
+    genres: [],
+    genres_array: [Array(13).fill("")],
   });
   let { id } = useParams();
-
+  if (id === undefined) id = 0;
   const navigate = useNavigate();
   const { jwtToken } = useOutletContext();
 
@@ -34,7 +36,44 @@ export const EditMovie = () => {
       navigate("/login");
       return;
     }
-  }, []);
+  }, [jwtToken, navigate]);
+
+  useEffect(() => {
+    if (id === 0) {
+      setMovie({
+        id: 0,
+        title: "",
+        release_date: "",
+        runtime: "",
+        mpaa_rating: "",
+        description: "",
+        genres: [],
+        genres_array: [Array(13).fill("")],
+      });
+      const headers = new Headers();
+      headers.append("Content-Type", "application/json");
+
+      const requestOptions = {
+        method: "GET",
+        headers,
+      };
+      fetch(`/genres`, requestOptions)
+        .then((res) => res.json())
+        .then((data) => {
+          const checks = [];
+          data.forEach((g) => {
+            checks.push({ id: g.id, checked: false, genre: g.genre });
+          });
+          setMovie((m) => ({
+            ...m,
+            genres: checks,
+            genres_array: [],
+          }));
+        })
+        .catch((err) => console.log(err));
+    } else {
+    }
+  }, [setMovie]);
 
   const handlerSubmit = (e) => {
     e.preventDefault();
@@ -53,6 +92,22 @@ export const EditMovie = () => {
 
   const hasError = (key) => {
     return errors.indexOf(key) !== -1;
+  };
+
+  const handleCheck = (event, position) => {
+    let tmpArr = movie.genres;
+    tmpArr[position].checked = !tmpArr[position].checked;
+    let tmpIDs = movie.genres_array;
+    if (!event.target.checked) {
+      tmpIDs.splice(tmpIDs.indexOf(event.target.value));
+    } else {
+      tmpIDs.push(+event.target.value);
+    }
+
+    setMovie({
+      ...movie,
+      genres_array: tmpIDs,
+    });
   };
 
   return (
@@ -112,6 +167,21 @@ export const EditMovie = () => {
         />
         <hr />
         <h3>Genres</h3>
+        {movie.genres && movie.genres.length > 1 && (
+          <>
+            {Array.from(movie.genres).map((g, index) => (
+              <Checkbox
+                key={index}
+                title={g.genre}
+                name="genre"
+                id={`genre-${index}`}
+                onChange={(event) => handleCheck(event, index)}
+                value={g.id}
+                checked={movie.genres[index].checked}
+              />
+            ))}
+          </>
+        )}
       </form>
     </div>
   );
